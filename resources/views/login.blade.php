@@ -26,6 +26,41 @@
 <body>
 
     <div class="container-fluid">
+        <!-- Toast container for session messages -->
+        <div aria-live="polite" aria-atomic="true" class="position-relative">
+            <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+                @if(session('success'))
+                    <div class="toast align-items-center bg-success text-white show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+                        <div class="d-flex">
+                            <div class="toast-body">{{ session('success') }}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div class="toast align-items-center bg-danger text-white show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+                        <div class="d-flex">
+                            <div class="toast-body">{{ session('error') }}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                @endif
+                @if ($errors->any())
+                    <div class="toast align-items-center bg-danger text-white show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
         <div class="card p-4">
             <h3 class="text-center mb-4" id="form-title">Login</h3>
             
@@ -50,10 +85,9 @@
                     <label for="registerDepartment" class="form-label">Department</label>
                     <select class="form-control" id="registerDepartment" required>
                         <option value="">Select Department</option>
-                        <option value="pharmacy">Pharmacy</option>
-                        <option value="sales">Sales</option>
-                        <option value="inventory">Inventory</option>
-                        <option value="admin">Admin</option>
+                        @foreach ($departments as $department)
+                            <option value="{{ $department->id }}">{{ $department->name }}</option>          
+                        @endforeach
                     </select>
                 </div>
                 <div class="mb-3">
@@ -79,6 +113,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Show all toasts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            toastElList.forEach(function(toastEl) {
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            });
+        });
+    </script>
+    <script>
         document.getElementById('toggle-form').addEventListener('click', function(e) {
             e.preventDefault();
             const loginForm = document.getElementById('login-form');
@@ -96,49 +140,6 @@
                 registerForm.classList.remove('d-none');
                 formTitle.textContent = 'Register';
                 toggleLink.textContent = "Already have an account? Login here.";
-            }
-        });
-
-        // Registration form validation
-        document.getElementById('register-form').addEventListener('submit', function(e) {
-            let valid = true;
-            let messages = [];
-
-            const username = document.getElementById('registerUsername').value.trim();
-            const department = document.getElementById('registerDepartment').value;
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            if (username.length < 3) {
-                valid = false;
-                messages.push('Username must be at least 3 characters.');
-            }
-
-            if (!department) {
-                valid = false;
-                messages.push('Please select a department.');
-            }
-
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                valid = false;
-                messages.push('Please enter a valid email address.');
-            }
-
-            if (password.length < 6) {
-                valid = false;
-                messages.push('Password must be at least 6 characters.');
-            }
-
-            if (password !== confirmPassword) {
-                valid = false;
-                messages.push('Passwords do not match.');
-            }
-
-            if (!valid) {
-                e.preventDefault();
-                alert(messages.join('\n'));
             }
         });
     </script>
