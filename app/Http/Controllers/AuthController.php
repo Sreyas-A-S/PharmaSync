@@ -7,61 +7,59 @@ use App\Models\Department;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+
     public function index() {
-        $departments = Department::all();
-        return view('login', ['departments' => $departments]);
+        return view('login', ['departments' => Department::all()]);
     }
 
+
     public function login(Request $request) {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return response()->json(['success' => true, 'message' => 'Login successful']);
+        try {
+            $data = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
+        } catch (ValidationException $e) {
+            return back()->withInput($request->only('email'))
+                ->withErrors($e->validator);
         }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid email or password.'
-        ], 401);
+        if (Auth::attempt($data)) {
+            $request->session()->regenerate();
+            $user = Auth::user();
+            if ($user->role === 'admin') {
+                return redirect('/admin')->with('success', 'Login successful');
+            } elseif ($user->role === 'head') {
+                return redirect('/head')->with('success', 'Login successful');
+            } else {
+                return redirect('/staff')->with('success', 'Login successful');
+            }
+        }
+        return back()->withInput($request->only('email'))->with('error', 'Invalid email or password.');
     }
 
     public function register(Request $request) {
         try {
-            $validated = $request->validate([
-                'name' => ['required', 'string', 'min:3'],
-                'email' => ['required', 'email', 'unique:users,email'],
-                'password' => ['required', 'min:6', 'confirmed'],
-                'role' => ['required', 'in:admin,head,staff'],
-                'department_id' => ['required', 'exists:departments,id'],
+            $data = $request->validate([
+                'name' => 'required|string|min:3',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:6',
+                'department_id' => 'required|exists:departments,id',
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'errors' => $e->errors(),
-                'message' => 'Validation failed',
-            ], 422);
+
+            if ($request->input('password') !== $request->input('confirm_password')) {
+                return back()->withInput()->withErrors(['confirm_password' => 'Passwords do not match.']);
+            }
+        } catch (ValidationException $e) {
+            return back()->withInput()->withErrors($e->validator);
         }
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-            'role' => $validated['role'],
-            'department_id' => $validated['department_id'],
-        ]);
-
+        $data['role'] = 'staff';
+        $data['password'] = bcrypt($data['password']);
+        $user = User::create($data);
         Auth::login($user);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Registration successful',
-        ]);
+        return redirect('/')->with('success', 'Registration successful');
     }
 }

@@ -8,7 +8,7 @@
     <style>
         body, html {
             height: 100%;
-            background-color: #f8f9fa; /* Light gray background */
+            background-color: #f8f9fa;
         }
         .container-fluid {
             display: flex;
@@ -26,7 +26,6 @@
 <body>
 
     <div class="container-fluid">
-        <!-- Toast container for session messages -->
         <div aria-live="polite" aria-atomic="true" class="position-relative">
             <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
                 @if(session('success'))
@@ -58,32 +57,52 @@
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                     </div>
+    <script>
+       
+        document.addEventListener('DOMContentLoaded', function() {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            toastElList.forEach(function(toastEl) {
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            });
+
+           
+            @if ($errors->any() && old('name'))
+                document.getElementById('login-form').classList.add('d-none');
+                document.getElementById('register-form').classList.remove('d-none');
+                document.getElementById('form-title').textContent = 'Register';
+                document.getElementById('toggle-form').textContent = "Already have an account? Login here.";
+            @endif
+        });
+    </script>
                 @endif
             </div>
         </div>
         <div class="card p-4">
             <h3 class="text-center mb-4" id="form-title">Login</h3>
             
-            <form id="login-form">
+            <form id="login-form" action="{{ route('login') }}" method="POST">
+                @csrf
                 <div class="mb-3">
                     <label for="loginEmail" class="form-label">Email address</label>
-                    <input type="email" class="form-control" id="loginEmail" placeholder="name@example.com" required>
+                    <input type="email" name="email" class="form-control" id="loginEmail" placeholder="name@exam .com" required>
                 </div>
                 <div class="mb-3">
                     <label for="loginPassword" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="loginPassword" required>
+                    <input type="password" name="password" class="form-control" id="loginPassword" required>
                 </div>
                 <button type="submit" class="btn btn-primary w-100 mb-2">Login</button>
             </form>
 
-            <form id="register-form" class="d-none">
+            <form id="register-form" class="d-none" action="{{ route('register') }}" method="POST">
+                @csrf
                 <div class="mb-3">
                     <label for="registerUsername" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="registerUsername" required>
+                    <input type="text" name="name" class="form-control" id="registerUsername" required>
                 </div>
                 <div class="mb-3">
                     <label for="registerDepartment" class="form-label">Department</label>
-                    <select class="form-control" id="registerDepartment" required>
+                    <select class="form-control" name="department_id" id="registerDepartment" required>
                         <option value="">Select Department</option>
                         @foreach ($departments as $department)
                             <option value="{{ $department->id }}">{{ $department->name }}</option>          
@@ -92,15 +111,16 @@
                 </div>
                 <div class="mb-3">
                     <label for="registerEmail" class="form-label">Email address</label>
-                    <input type="email" class="form-control" id="registerEmail" placeholder="name@example.com" required>
+                    <input type="email" name="email" class="form-control" id="registerEmail" placeholder="name@example.com" required>
                 </div>
                 <div class="mb-3">
                     <label for="registerPassword" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="registerPassword" required>
+                    <input type="password" name="password" class="form-control" id="registerPassword" required>
                 </div>
                 <div class="mb-3">
                     <label for="confirmPassword" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="confirmPassword" required>
+                    <input type="password"  name="confirm_password" class="form-control" id="confirmPassword" required>
+                    <div id="password-match-error" class="text-danger small mt-1" style="display:none;"></div>
                 </div>
                 <button type="submit" class="btn btn-success w-100 mb-2">Register</button>
             </form>
@@ -113,13 +133,42 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Show all toasts on page load
         document.addEventListener('DOMContentLoaded', function() {
             var toastElList = [].slice.call(document.querySelectorAll('.toast'));
             toastElList.forEach(function(toastEl) {
                 var toast = new bootstrap.Toast(toastEl);
                 toast.show();
             });
+
+            // Password match validation for registration form
+            var registerForm = document.getElementById('register-form');
+            var passwordInput = document.getElementById('registerPassword');
+            var confirmPasswordInput = document.getElementById('confirmPassword');
+            var errorDiv = document.getElementById('password-match-error');
+            function checkPasswordMatch() {
+                var password = passwordInput.value;
+                var confirmPassword = confirmPasswordInput.value;
+                if (password && confirmPassword && password !== confirmPassword) {
+                    errorDiv.textContent = 'Passwords do not match.';
+                    errorDiv.style.display = 'block';
+                } else {
+                    errorDiv.textContent = '';
+                    errorDiv.style.display = 'none';
+                }
+            }
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    var password = passwordInput.value;
+                    var confirmPassword = confirmPasswordInput.value;
+                    if (password !== confirmPassword) {
+                        e.preventDefault();
+                        errorDiv.textContent = 'Passwords do not match.';
+                        errorDiv.style.display = 'block';
+                    }
+                });
+                passwordInput.addEventListener('input', checkPasswordMatch);
+                confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+            }
         });
     </script>
     <script>
