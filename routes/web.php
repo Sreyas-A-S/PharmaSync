@@ -15,4 +15,14 @@ Route::middleware(['auth', 'role:staff'])->group(function(){
     Route::get('/updates', [UpdatesController::class, 'updates'])->name('updates');
     Route::put('/updates/{update}', [UpdatesController::class, 'update'])->name('updates.update');
     Route::delete('/updates/{update}', [UpdatesController::class, 'destroy'])->name('updates.destroy');
+    Route::post('/updates', [UpdatesController::class, 'store'])->name('updates.store');
+});
+
+Route::middleware(['auth', 'role:head'])->group( function() {
+    Route::get('dashboard', [UpdatesController::class, 'dashboard'])->name('dashboard');
+    Route::get('department-updates', [UpdatesController::class, 'departmentUpdates'])->name('department.updates');
+});
+
+Route::middleware(['auth', 'role:admin'])->group( function() {
+    
 });

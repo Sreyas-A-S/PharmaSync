@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::insert([
+        User::create([
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'role' => 'admin',
@@ -22,12 +22,28 @@ class UserSeeder extends Seeder
             'department_id' => null,
         ]);
 
-        User::insert([
+        User::create([
             'name' => 'Sreyas',
             'email' => 'sreyasas25@gmail.com',
             'role' => 'staff',
             'password' => Hash::make('password'),
-            'department_id' => null,
+            'department_id' => 1,
+        ]);
+
+        User::create([
+            'name' => 'Employee',
+            'email' => 'employee@gmail.com',
+            'role' => 'staff',
+            'password' => Hash::make('password'),
+            'department_id' => 1,
+        ]);
+
+        User::create([
+            'name' => 'Head',
+            'email' => 'head@gmail.com',
+            'role' => 'head',
+            'password' => Hash::make('password'),
+            'department_id' => 1,
         ]);
     }
 }
