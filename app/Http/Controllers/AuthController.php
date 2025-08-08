@@ -30,6 +30,7 @@ class AuthController extends Controller
         if (Auth::attempt($data)) {
             $request->session()->regenerate();
             $user = Auth::user();
+            
             if ($user->role === 'admin') {
                 return redirect('/admin')->with('success', 'Login successful');
             } elseif ($user->role === 'head') {

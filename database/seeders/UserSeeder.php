@@ -21,5 +21,13 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'department_id' => null,
         ]);
+
+        User::insert([
+            'name' => 'Sreyas',
+            'email' => 'sreyasas25@gmail.com',
+            'role' => 'staff',
+            'password' => Hash::make('password'),
+            'department_id' => null,
+        ]);
     }
 }
