@@ -2,6 +2,7 @@
 
 @section('main')
     <div class="container mt-4">
+        <div id="alert-container"></div>
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">Weekly Updates</h5>
@@ -54,11 +55,43 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="deleteUpdateModal" tabindex="-1" aria-labelledby="deleteUpdateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteUpdateModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this update?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
     <script>
         $(document).ready(function () {
+            let deleteUpdateId = null;
+
+            function showAlert(message, type) {
+                const alertContainer = $('#alert-container');
+                const alert = $(`
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `);
+                alertContainer.append(alert);
+                setTimeout(() => alert.alert('close'), 5000);
+            }
+
             console.log('DataTable initializing');
             const table = $('#updates-table').DataTable({
                 processing: true,
@@ -123,15 +156,29 @@
                 .on('click', '.delete-update', function () {
                     const row = $(this).closest('tr');
                     const data = table.row(row).data();
-                    if (confirm('Are you sure you want to delete this update?')) {
-                        fetch(`/updates/${data.id}` , {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        }).then(() => table.ajax.reload());
-                    }
+                    deleteUpdateId = data.id;
+                    var modal = new bootstrap.Modal(document.getElementById('deleteUpdateModal'));
+                    modal.show();
                 });
+
+            $('#confirmDeleteBtn').on('click', function () {
+                fetch(`/updates/${deleteUpdateId}` , {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                }).then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    bootstrap.Modal.getInstance(document.getElementById('deleteUpdateModal')).hide();
+                    showAlert(data.message, 'success');
+                    table.ajax.reload();
+                }).catch(error => showAlert(error.message, 'danger'));
+            });
 
 
             $('#editUpdateForm').on('submit', function (e) {
@@ -147,10 +194,17 @@
                         title: $('#editUpdateTitle').val(),
                         description: $('#editUpdateDescription').val()
                     })
-                }).then(() => {
+                }).then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
                     bootstrap.Modal.getInstance(document.getElementById('editUpdateModal')).hide();
+                    showAlert(data.message, 'success');
                     table.ajax.reload();
-                });
+                }).catch(error => showAlert(error.message, 'danger'));
             });
         });
     </script>

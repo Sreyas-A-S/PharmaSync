@@ -17,7 +17,7 @@
         .profile-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     </style>
 </head>
-<body class="d-flex flex-column min-vh-100" style="background-color: #f8f9fa;">
+<body class="d-flex flex-column min-vh-100" style="background-color: #d9d9d9;">
     <!-- Preloader -->
     <div id="preloader" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;background:#fff;display:flex;align-items:center;justify-content:center;transition:opacity 0.3s;">
         <div class="d-flex flex-column align-items-center justify-content-center w-100 h-100">

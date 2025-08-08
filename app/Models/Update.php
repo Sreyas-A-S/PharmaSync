@@ -8,7 +8,7 @@ class Update extends Model
 {
     protected $fillable = [
         'user_id',
-        'task',
+        'title',
         'description',
         'attachment_path'
     ];
