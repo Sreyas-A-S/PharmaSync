@@ -37,7 +37,7 @@ class AuthController extends Controller
             } else {
                 return redirect('/staff')->with('success', 'Login successful');
             }
-        }
+                }
         return back()->withInput($request->only('email'))->with('error', 'Invalid email or password.');
     }
 
@@ -61,5 +61,14 @@ class AuthController extends Controller
         $user = User::create($data);
         Auth::login($user);
         return redirect('/')->with('success', 'Registration successful');
+    }
+
+    public function logout() {
+        Auth::logout();
+        return redirect('/');
+    }
+
+    public function dashboard() {
+
     }
 }

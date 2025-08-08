@@ -6,6 +6,14 @@
     <title>Login / Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        .login-logo {
+            display: block;
+            margin: 0 auto 18px auto;
+            height: 60px;
+            width: auto;
+        }
+    </style>
+    <style>
         body, html {
             height: 100%;
             background-color: #f8f9fa;
@@ -79,6 +87,7 @@
             </div>
         </div>
         <div class="card p-4">
+            <img src="Images/logo.png" alt="Logo" class="login-logo">
             <h3 class="text-center mb-4" id="form-title">Login</h3>
             
             <form id="login-form" action="{{ route('login') }}" method="POST">
