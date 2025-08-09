@@ -82,7 +82,6 @@
             </div>
         </div>
 
-        <!-- All Updates Section -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">All Updates</h5>
@@ -112,6 +111,8 @@
         @include('modals.user_modals')
 
         @include('modals.department_modals')
+
+        @include('modals.attachment_modals')
 
     </div>
 @endsection
@@ -192,11 +193,8 @@
                     {
                         data: 'attachments', className: 'text-center', render: (d, t, r) => {
                             if (!d || d.length === 0) return '';
-                            let html = '';
-                            d.forEach(attachment => {
-                                html += `<a href="/storage/${attachment.file_path}" target="_blank" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-file-earmark"></i></a>`;
-                            });
-                            return html;
+                            const jsonAttachments = JSON.stringify(d).replace(/"/g, '&quot;');
+                            return `<button class="btn btn-sm btn-primary view-attachments-btn" data-attachments="${jsonAttachments}">View (${d.length})</button>`;
                         }
                     },
                     { data: 'created_at', className: 'text-nowrap', render: d => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '' },
@@ -504,15 +502,52 @@
                 }).catch(error => showAlert(error.message, 'danger'));
             });
 
-            // Read more/show less for description in All Updates table
-            $('#all-updates-table').on('click', '.read-more-link', function (e) {
-                e.preventDefault();
-                var $row = $(this).closest('td');
-                $row.find('.desc-short, .desc-full').toggleClass('d-none');
-                $(this).text($(this).text() === 'Read more' ? 'Show less' : 'Read more');
-            });
+            $('#all-updates-table')
+                .on('click', '.read-more-link', function (e) {
+                    e.preventDefault();
+                    var $row = $(this).closest('td');
+                    $row.find('.desc-short, .desc-full').toggleClass('d-none');
+                    $(this).text($(this).text() === 'Read more' ? 'Show less' : 'Read more');
+                })
+                .on('click', '.view-attachments-btn', function () {
+                    const attachments = $(this).data('attachments');
+                    const attachmentsList = $('#attachmentsList');
+                    attachmentsList.empty(); 
 
-            // Fetch departments for user creation/edit dropdowns
+                    if (attachments && attachments.length > 0) {
+                        attachments.forEach(attachment => {
+                            const fullFileName = attachment.file_path.split('/').pop();
+                            const parts = fullFileName.split('_');
+                            let originalFileName = fullFileName;
+                            if (parts.length > 1 && /^[0-9a-f]+$/.test(parts[0])) { 
+                                originalFileName = parts.slice(1).join('_');
+                            }
+                            const fileExtension = originalFileName.split('.').pop().toLowerCase();
+                            let previewHtml = '';
+
+                            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+                                previewHtml = `<img src="/storage/${attachment.file_path}" alt="${originalFileName}" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">`;
+                            } else if (fileExtension === 'pdf') {
+                                previewHtml = `<i class="bi bi-file-earmark-pdf fs-4 me-2"></i>`;
+                            } else {
+                                previewHtml = `<i class="bi bi-file-earmark fs-4 me-2"></i>`;
+                            }
+
+                            attachmentsList.append(`
+                                <a href="/storage/${attachment.file_path}" target="_blank" class="list-group-item list-group-item-action d-flex align-items-center">
+                                    ${previewHtml}
+                                    ${originalFileName}
+                                    <i class="bi bi-box-arrow-up-right ms-auto"></i>
+                                </a>
+                            `);
+                        });
+                    } else {
+                        attachmentsList.append('<p class="text-muted">No attachments found.</p>');
+                    }
+
+                    $('#viewAttachmentsModal').modal('show');
+                });
+
             function fetchDepartmentsForDropdown() {
                 fetch("{{ route('admin.departments') }}")
                     .then(response => response.json())

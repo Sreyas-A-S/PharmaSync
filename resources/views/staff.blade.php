@@ -159,27 +159,10 @@
                             return d;
                         }
                     },
-                    {
-                        data: 'attachments', className: 'text-center', render: (d, t, r) => {
+                    { data: 'attachments', className: 'text-center', render: (d, t, r) => {
                             if (!d || d.length === 0) return '';
-                            const maxAttachmentsToShow = 3; // Define your threshold here
-                            let html = '';
-                            let hiddenAttachmentsHtml = '';
-
-                            d.forEach((attachment, index) => {
-                                const attachmentHtml = `<a href="/storage/${attachment.file_path}" target="_blank" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-file-earmark"></i></a>`;
-                                if (index < maxAttachmentsToShow) {
-                                    html += attachmentHtml;
-                                } else {
-                                    hiddenAttachmentsHtml += attachmentHtml;
-                                }
-                            });
-
-                            if (d.length > maxAttachmentsToShow) {
-                                html += `<div class="attachments-hidden" style="display:none;">${hiddenAttachmentsHtml}</div>`;
-                                html += `<button class="btn btn-sm btn-link expand-attachments-btn" data-expanded="false">Expand (${d.length - maxAttachmentsToShow})</button>`;
-                            }
-                            return html;
+                            const jsonAttachments = JSON.stringify(d).replace(/"/g, '&quot;');
+                            return `<button class="btn btn-sm btn-primary view-attachments-btn" data-attachments="${jsonAttachments}">View (${d.length})</button>`;
                         }
                     },
                     { data: 'created_at', className: 'text-nowrap', render: d => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '' },
@@ -236,12 +219,12 @@
                 .on('click', '.edit-update', function () {
                     const row = $(this).closest('tr');
                     const data = table.row(row).data();
-                    // Populate and show modal
+                 
                     $('#editUpdateId').val(data.id);
                     $('#editUpdateTitle').val(data.title);
                     $('#editUpdateDescription').val(data.description);
 
-                    // Populate current attachments
+                  
                     const currentAttachmentsDiv = $('#currentAttachments');
                     currentAttachmentsDiv.empty();
                     if (data.attachments && data.attachments.length > 0) {
@@ -274,7 +257,6 @@
                         currentAttachmentsDiv.append('<p>No attachments.</p>');
                     }
 
-                    // Clear new attachments input
                     $('#editUpdateAttachment').val('');
                     $('#editAttachmentsPreview').empty();
 
@@ -287,6 +269,44 @@
                     deleteUpdateId = data.id;
                     var modal = new bootstrap.Modal(document.getElementById('deleteUpdateModal'));
                     modal.show();
+                })
+                .on('click', '.view-attachments-btn', function () {
+                    const attachments = $(this).data('attachments');
+                    const attachmentsList = $('#attachmentsList');
+                    attachmentsList.empty(); 
+
+                    if (attachments && attachments.length > 0) {
+                        attachments.forEach(attachment => {
+                            const fullFileName = attachment.file_path.split('/').pop();
+                            const parts = fullFileName.split('_');
+                            let originalFileName = fullFileName;
+                            if (parts.length > 1 && /^[0-9a-f]+$/.test(parts[0])) { 
+                                originalFileName = parts.slice(1).join('_');
+                            }
+                            const fileExtension = originalFileName.split('.').pop().toLowerCase();
+                            let previewHtml = '';
+
+                            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+                                previewHtml = `<img src="/storage/${attachment.file_path}" alt="${originalFileName}" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">`;
+                            } else if (fileExtension === 'pdf') {
+                                previewHtml = `<i class="bi bi-file-earmark-pdf fs-4 me-2"></i>`;
+                            } else {
+                                previewHtml = `<i class="bi bi-file-earmark fs-4 me-2"></i>`;
+                            }
+
+                            attachmentsList.append(`
+                                <a href="/storage/${attachment.file_path}" target="_blank" class="list-group-item list-group-item-action d-flex align-items-center">
+                                    ${previewHtml}
+                                    ${originalFileName}
+                                    <i class="bi bi-box-arrow-up-right ms-auto"></i>
+                                </a>
+                            `);
+                        });
+                    } else {
+                        attachmentsList.append('<p class="text-muted">No attachments found.</p>');
+                    }
+
+                    $('#viewAttachmentsModal').modal('show');
                 });
 
             $('#confirmDeleteBtn').on('click', function () {
@@ -317,16 +337,14 @@
                 formData.append('title', $('#editUpdateTitle').val());
                 formData.append('description', $('#editUpdateDescription').val());
 
-                // Append attachments marked for deletion
                 $('#currentAttachments .attachment-item.deleted').each(function() {
                     formData.append('delete_attachments[]', $(this).data('id'));
                 });
 
                 const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
-                const maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
+                const maxFileSize = 2 * 1024 * 1024; 
                 let isValid = true;
 
-                // Add new attachments
                 const newAttachments = $('#editUpdateAttachment')[0].files;
                 for (let i = 0; i < newAttachments.length; i++) {
                     const fileName = newAttachments[i].name;
@@ -348,11 +366,11 @@
                     return;
                 }
 
-                // Since FormData is used, we need to manually set the method to PUT
+                
                 formData.append('_method', 'PUT');
 
                 fetch(`/updates/${id}` , {
-                    method: 'POST', // Use POST for FormData with _method PUT
+                    method: 'POST', 
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
@@ -379,7 +397,7 @@
 
                 const files = $('#createUpdateAttachment')[0].files;
                 const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
-                const maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
+                const maxFileSize = 2 * 1024 * 1024;
                 let isValid = true;
 
                 for (let i = 0; i < files.length; i++) {
@@ -421,7 +439,6 @@
                 }).catch(error => showAlert(error.message, 'danger'));
             });
 
-            // Function to render attachment previews
             function renderAttachmentPreviews(files, previewContainer, isNew = true) {
                 previewContainer.empty();
                 if (files.length === 0) {
@@ -473,13 +490,13 @@
                 });
             }
 
-            // Handle file input change for create modal
+           
             $('#createUpdateAttachment').on('change', function() {
                 const previewContainer = $('#createAttachmentsPreview');
                 renderAttachmentPreviews(this.files, previewContainer);
             });
 
-            // Handle removal of newly selected files for create modal
+            
             $('#createAttachmentsPreview').on('click', '.btn-close', function() {
                 const itemToRemove = $(this).closest('.attachment-item');
                 const fileIndex = itemToRemove.data('file-index');
@@ -493,17 +510,16 @@
                 }
                 $('#createUpdateAttachment')[0].files = dataTransfer.files;
                 itemToRemove.remove();
-                // Re-render previews to update data-file-index
                 renderAttachmentPreviews($('#createUpdateAttachment')[0].files, $('#createAttachmentsPreview'));
             });
 
-            // Handle file input change for edit modal (new attachments)
+            
             $('#editUpdateAttachment').on('change', function() {
                 const previewContainer = $('#editAttachmentsPreview');
                 renderAttachmentPreviews(this.files, previewContainer);
             });
 
-            // Handle removal of newly selected files for edit modal
+            
             $('#editAttachmentsPreview').on('click', '.btn-close', function() {
                 const itemToRemove = $(this).closest('.attachment-item');
                 const fileIndex = itemToRemove.data('file-index');
@@ -517,22 +533,20 @@
                 }
                 $('#editUpdateAttachment')[0].files = dataTransfer.files;
                 itemToRemove.remove();
-                // Re-render previews to update data-file-index
                 renderAttachmentPreviews($('#editUpdateAttachment')[0].files, $('#editAttachmentsPreview'));
             });
 
-            // Handle removal of existing attachments for edit modal
+           
             $('#currentAttachments').on('click', '.btn-close', function() {
                 const itemToRemove = $(this).closest('.attachment-item');
-                itemToRemove.toggleClass('deleted'); // Mark for deletion
+                itemToRemove.toggleClass('deleted');
                 if (itemToRemove.hasClass('deleted')) {
-                    itemToRemove.css('opacity', '0.5'); // Visual cue for deletion
+                    itemToRemove.css('opacity', '0.5'); 
                 } else {
                     itemToRemove.css('opacity', '1');
                 }
             });
 
-            // Clear attachments preview on modal close
             $('#createUpdateModal').on('hidden.bs.modal', function () {
                 $('#createAttachmentsPreview').empty();
                 $('#createUpdateAttachment').val('');
@@ -545,3 +559,4 @@
         });
     </script>
 @endsection
+ @include('modals.attachment_modals')

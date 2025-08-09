@@ -68,7 +68,9 @@ class UpdatesController extends Controller
             // Handle new attachment uploads
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('attachments', 'public');
+                    $originalName = $file->getClientOriginalName();
+                    $fileName = uniqid() . '_' . $originalName; // Prepend a unique ID
+                    $path = $file->storeAs('attachments', $fileName, 'public');
                     $update->attachments()->create(['file_path' => $path]);
                 }
             }
@@ -115,7 +117,9 @@ class UpdatesController extends Controller
 
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('attachments', 'public');
+                    $originalName = $file->getClientOriginalName();
+                    $fileName = uniqid() . '_' . $originalName; // Prepend a unique ID
+                    $path = $file->storeAs('attachments', $fileName, 'public');
                     $update->attachments()->create(['file_path' => $path]);
                 }
             }

@@ -18,11 +18,42 @@
         .footer { flex-shrink: 0; }
         .profile-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
         .profile-img-dropdown { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff; /* Or a color that matches your theme */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Ensure it's on top of everything */
+            transition: opacity 0.5s ease-out; /* Smooth fade out */
+        }
+
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .preloader-logo {
+            width: 100px; /* Adjust size as needed */
+            height: auto;
+            animation: pulse 1.5s infinite alternate; /* Simple pulse animation */
+        }
+
+        @keyframes pulse {
+            from { transform: scale(0.9); opacity: 0.7; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100" style="background-color: #ecececff;">
 
-    
+    <div id="preloader">
+        <img src="{{ asset('Images/logo.png') }}" alt="Loading..." class="preloader-logo">
+    </div>
 
     <header class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2 fixed-top">
         <div class="container-fluid d-flex justify-content-between align-items-center">
@@ -75,5 +106,17 @@
         
 </script>
 @yield('scripts')
+    <script>
+        window.addEventListener('load', function() {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                preloader.classList.add('hidden');
+                // Optional: Remove preloader from DOM after transition
+                preloader.addEventListener('transitionend', function() {
+                    preloader.remove();
+                });
+            }
+        });
+    </script>
 </body>
 </html>
