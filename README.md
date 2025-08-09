@@ -4,7 +4,7 @@
       <img src="public/Images/logo.png" alt="PharmaSync Logo" width="90" />
     </td>
     <td valign="middle" style="padding:0;">
-      <h1 style="font-size:32px; margin:0; line-height:1.1;">
+      <h1 style="font-size:32px; margin:0; line-height:1.1; font-weight:bold;">
         PharmaSync: Your Central Hub for Seamless Pharmacy Operations
       </h1>
     </td>
