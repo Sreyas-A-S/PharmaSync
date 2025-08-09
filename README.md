@@ -1,4 +1,4 @@
-<table>
+<table style="border:none;">
   <tr>
     <td valign="middle" style="padding-right:12px;">
       <img src="public/Images/logo.png" alt="PharmaSync Logo" width="90" />
