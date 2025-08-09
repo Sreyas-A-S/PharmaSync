@@ -1,7 +1,7 @@
-<p align="left" style="display: flex; align-items: center; gap: 10px;">
-    <img src="public/Images/logo.png" alt="PharmaSync Logo" width="80">
-    <strong style="font-size: 24px;">PharmaSync: Your Central Hub for Seamless Pharmacy Operations</strong>
-</p>
+<div style="display: flex; align-items: center; gap: 15px;">
+    <img src="public/Images/logo.png" alt="PharmaSync Logo" width="90">
+    <span style="font-size: 32px; font-weight: bold;">PharmaSync: Your Central Hub for Seamless Pharmacy Operations</span>
+</div>
 
 Welcome to PharmaSync, the intuitive and efficient platform designed to streamline communication, manage personnel, organize departments, and centralize important updates within your pharmacy. PharmaSync empowers your team to stay connected, informed, and productive, ensuring smooth and compliant operations.
 
