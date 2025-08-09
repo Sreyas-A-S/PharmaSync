@@ -162,10 +162,23 @@
                     {
                         data: 'attachments', className: 'text-center', render: (d, t, r) => {
                             if (!d || d.length === 0) return '';
+                            const maxAttachmentsToShow = 3; // Define your threshold here
                             let html = '';
-                            d.forEach(attachment => {
-                                html += `<a href="/storage/${attachment.file_path}" target="_blank" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-file-earmark"></i></a>`;
+                            let hiddenAttachmentsHtml = '';
+
+                            d.forEach((attachment, index) => {
+                                const attachmentHtml = `<a href="/storage/${attachment.file_path}" target="_blank" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-file-earmark"></i></a>`;
+                                if (index < maxAttachmentsToShow) {
+                                    html += attachmentHtml;
+                                } else {
+                                    hiddenAttachmentsHtml += attachmentHtml;
+                                }
                             });
+
+                            if (d.length > maxAttachmentsToShow) {
+                                html += `<div class="attachments-hidden" style="display:none;">${hiddenAttachmentsHtml}</div>`;
+                                html += `<button class="btn btn-sm btn-link expand-attachments-btn" data-expanded="false">Expand (${d.length - maxAttachmentsToShow})</button>`;
+                            }
                             return html;
                         }
                     },
@@ -203,6 +216,22 @@
                     var $row = $(this).closest('td');
                     $row.find('.desc-short, .desc-full').toggleClass('d-none');
                     $(this).text($(this).text() === 'Read more' ? 'Show less' : 'Read more');
+                })
+                .on('click', '.expand-attachments-btn', function (e) {
+                    e.preventDefault();
+                    const $btn = $(this);
+                    const $hiddenDiv = $btn.prev('.attachments-hidden');
+                    const isExpanded = $btn.data('expanded');
+
+                    if (isExpanded) {
+                        $hiddenDiv.hide();
+                        $btn.text(`Expand (${$hiddenDiv.children().length})`);
+                        $btn.data('expanded', false);
+                    } else {
+                        $hiddenDiv.show();
+                        $btn.text('Collapse');
+                        $btn.data('expanded', true);
+                    }
                 })
                 .on('click', '.edit-update', function () {
                     const row = $(this).closest('tr');
@@ -294,6 +323,7 @@
                 });
 
                 const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
+                const maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
                 let isValid = true;
 
                 // Add new attachments
@@ -306,7 +336,16 @@
                         isValid = false;
                         break;
                     }
+                    if (newAttachments[i].size > maxFileSize) {
+                        showAlert(`File size exceeds limit for ${fileName}. Maximum allowed size is 2MB.`, 'danger');
+                        isValid = false;
+                        break;
+                    }
                     formData.append('attachments[]', newAttachments[i]);
+                }
+
+                if (!isValid) {
+                    return;
                 }
 
                 // Since FormData is used, we need to manually set the method to PUT
@@ -340,6 +379,7 @@
 
                 const files = $('#createUpdateAttachment')[0].files;
                 const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
+                const maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
                 let isValid = true;
 
                 for (let i = 0; i < files.length; i++) {
@@ -347,6 +387,11 @@
                     const fileExtension = fileName.split('.').pop().toLowerCase();
                     if (!allowedExtensions.includes(fileExtension)) {
                         showAlert(`Invalid file type: ${fileName}. Only JPG, JPEG, PNG, and PDF files are allowed.`, 'danger');
+                        isValid = false;
+                        break;
+                    }
+                    if (files[i].size > maxFileSize) {
+                        showAlert(`File size exceeds limit for ${fileName}. Maximum allowed size is 2MB.`, 'danger');
                         isValid = false;
                         break;
                     }

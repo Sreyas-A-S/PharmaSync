@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UpdatesController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,5 +25,20 @@ Route::middleware(['auth', 'role:head'])->group( function() {
 });
 
 Route::middleware(['auth', 'role:admin'])->group( function() {
-    
+    Route::get('admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+    // User Management
+    Route::get('admin/users', [AdminController::class, 'getUsers'])->name('admin.users');
+    Route::post('admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
+    Route::put('admin/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+    Route::delete('admin/users/{user}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
+
+    // Department Management
+    Route::get('admin/departments', [AdminController::class, 'getDepartments'])->name('admin.departments');
+    Route::post('admin/departments', [AdminController::class, 'storeDepartment'])->name('admin.departments.store');
+    Route::put('admin/departments/{department}', [AdminController::class, 'updateDepartment'])->name('admin.departments.update');
+    Route::delete('admin/departments/{department}', [AdminController::class, 'destroyDepartment'])->name('admin.departments.destroy');
+
+    // Updates Management
+    Route::get('admin/all-updates', [AdminController::class, 'getAllUpdates'])->name('admin.all-updates');
 });

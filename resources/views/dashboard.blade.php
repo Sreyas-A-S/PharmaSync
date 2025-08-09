@@ -2,36 +2,35 @@
 
 @section('main')
     <div class="container mt-4">
+        <h2 class="mb-4">Department Head Dashboard</h2>
+
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0">Staff Update Summary</h5>
+                <h5 class="mb-0">Employee Updates Summary</h5>
             </div>
             <div class="card-body">
-                <div class="row" id="employee-summary">
-                    @forelse ($users as $user)
-                        <div class="col-md-3 mb-3">
-                            <div class="card text-center h-100 shadow-sm employee-card" data-user-id="{{ $user->id }}" style="cursor: pointer;">
+                <div class="row">
+                    @foreach($users as $user)
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-white bg-primary">
                                 <div class="card-body">
-                                    <h6 class="card-title">{{ $user->name }}</h6>
-                                    <p class="card-text">Updates: <span class="badge bg-primary">{{ $updatesCount[$user->id] ?? 0 }}</span></p>
+                                    <h5 class="card-title">{{ $user->name }}</h5>
+                                    <p class="card-text">Updates Posted: {{ $updatesCount[$user->id] ?? 0 }}</p>
+                                    <button class="btn btn-light view-employee-updates" data-user-id="{{ $user->id }}">View Updates</button>
                                 </div>
                             </div>
                         </div>
-                    @empty
-                        <div class="col-12">
-                            <p>No employees found in your department.</p>
-                        </div>
-                    @endforelse
+                    @endforeach
                 </div>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Department Updates</h5>
-                <select class="form-select w-auto" id="employeeFilter">
+                <h5 class="mb-0">All Department Updates</h5>
+                <select id="employeeFilter" class="form-select w-auto">
                     <option value="all">All Employees</option>
-                    @foreach ($users as $user)
+                    @foreach($users as $user)
                         <option value="{{ $user->id }}" {{ $selectedUserId == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
                     @endforeach
                 </select>
@@ -73,8 +72,8 @@
                 },
                 columns: [
                     { data: null, className: 'text-center', render: (d, t, r, m) => m.row + 1 },
-                    { data: 'user.name', className: 'fw-semibold' },
-                    { data: 'title', className: 'fw-semibold' },
+                    { data: 'user.name', defaultContent: 'N/A' },
+                    { data: 'title' },
                     {
                         data: 'description', className: 'text-wrap', render: (d, t) => {
                             const max = 80;
@@ -83,8 +82,7 @@
                             return d;
                         }
                     },
-                    {
-                        data: 'attachments', className: 'text-center', render: (d, t, r) => {
+                    { data: 'attachments', className: 'text-center', render: (d, t, r) => {
                             if (!d || d.length === 0) return '';
                             let html = '';
                             d.forEach(attachment => {
@@ -98,43 +96,25 @@
                 responsive: true,
                 pageLength: 10,
                 lengthMenu: [5, 10, 25, 50],
-                language: {
-                    search: "<span class='me-2'>🔍</span>Search:",
-                    lengthMenu: "Show _MENU_ entries",
-                    info: "Showing _START_ to _END_ of _TOTAL_ updates",
-                    infoEmpty: "No updates available",
-                    zeroRecords: "No matching updates found",
-                    paginate: { previous: "<", next: ">" }
-                },
-                dom: '<"row mb-2"<"col-sm-6"l><"col-sm-6 text-end"f>>rt<"row mt-2"<"col-sm-6"i><"col-sm-6"p>>',
-                drawCallback: function () {
-                    if (window.bootstrap && bootstrap.Tooltip) {
-                        [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]')).map(function (el) {
-                            return new bootstrap.Tooltip(el);
-                        });
-                    }
-                }
+                dom: '<"row mb-2"f>rt<"row mt-2"i<"col-sm-6"p>>', // Removed length changing input
             });
 
-            $('#employeeFilter').on('change', function() {
+            $('#employeeFilter').on('change', function () {
                 departmentUpdatesTable.ajax.reload();
             });
 
-            $('#employee-summary').on('click', '.employee-card', function() {
+            $('.view-employee-updates').on('click', function() {
                 const userId = $(this).data('user-id');
                 $('#employeeFilter').val(userId).trigger('change');
             });
 
+            // Read more/show less for description
             $('#department-updates-table').on('click', '.read-more-link', function (e) {
                 e.preventDefault();
                 var $row = $(this).closest('td');
                 $row.find('.desc-short, .desc-full').toggleClass('d-none');
                 $(this).text($(this).text() === 'Read more' ? 'Show less' : 'Read more');
             });
-
-            @if ($selectedUserId)
-                $('#employeeFilter').val('{{ $selectedUserId }}').trigger('change');
-            @endif
         });
     </script>
 @endsection

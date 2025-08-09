@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login / Register</title>
+    <link rel="preload" href="{{ asset('Images/logo.png') }}" as="image">
+    <link rel="icon" type="image/x-icon" href="{{ asset('Images/logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .login-logo {
@@ -94,7 +96,7 @@
                 @csrf
                 <div class="mb-3">
                     <label for="loginEmail" class="form-label">Email address</label>
-                    <input type="email" name="email" class="form-control" id="loginEmail" placeholder="name@exam .com" required>
+                    <input type="email" name="email" class="form-control" id="loginEmail" placeholder="name@example.com" required>
                 </div>
                 <div class="mb-3">
                     <label for="loginPassword" class="form-label">Password</label>
@@ -149,7 +151,7 @@
                 toast.show();
             });
 
-            // Password match validation for registration form
+        
             var registerForm = document.getElementById('register-form');
             var passwordInput = document.getElementById('registerPassword');
             var confirmPasswordInput = document.getElementById('confirmPassword');

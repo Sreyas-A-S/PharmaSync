@@ -130,7 +130,6 @@ class UpdatesController extends Controller
     public function dashboard(Request $request) {
         $department_id = Auth::user()->department_id;
         $users = User::where('department_id', $department_id)->where('role', 'staff')->get();
-
         $updatesCount = [];
         foreach ($users as $user) {
             $updatesCount[$user->id] = $user->updates()->count();

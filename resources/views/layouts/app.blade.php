@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name', 'PharmaSync') }}</title>
-    <link rel="preload" href="Images/logo.png" as="image">
-    <link rel="icon" type="image/x-icon" href="/images/logo.png">
+    <link rel="preload" href="{{ asset('Images/logo.png') }}" as="image">
+    <link rel="icon" type="image/x-icon" href="{{ asset('Images/logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -17,21 +17,17 @@
         .main-content { flex: 1 0 auto; }
         .footer { flex-shrink: 0; }
         .profile-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        .profile-img-dropdown { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100" style="background-color: #ecececff;">
 
-    <div id="preloader" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;background:#fff;display:flex;align-items:center;justify-content:center;transition:opacity 0.3s;">
-        <div class="d-flex flex-column align-items-center justify-content-center w-100 h-100">
-            <img src="Images/logo.png" alt="Logo" style="height:70px;width:auto;margin-bottom:28px;display:block;">
-            <div class="text-primary fs-5 fw-semibold">Loading...</div>
-        </div>
-    </div>
+    
 
     <header class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2 fixed-top">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="Images/logo.png" alt="Logo" style="height:40px; width:auto; margin-right:10px;">
+                <img src="{{ asset('Images/logo.png') }}" alt="Logo" style="height:40px; width:auto; margin-right:10px;">
                 <span class="fw-bold">PharmaSync</span>
             </a>
             <div class="dropdown">
@@ -39,9 +35,9 @@
                     <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}" alt="Profile" class="profile-img me-1">
                     <span>{{ Auth::user()->name ?? 'User' }}</span>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow p-2" aria-labelledby="profileDropdown" style="min-width: 180px;">
+                <ul class="dropdown-menu dropdown-menu-end shadow p-2" aria-labelledby="profileDropdown" style="min-width: 150px;">
                     <li class="text-center mb-1">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}" alt="Profile" class="profile-img mb-1">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}" alt="Profile" class="profile-img-dropdown mb-1">
                         <div class="fw-semibold small">{{ Auth::user()->name ?? 'User' }}</div>
                         <div class="text-muted" style="font-size: 0.75em;">Role: <span class="fw-semibold">{{ Auth::user()->role ?? '-' }}</span></div>
                     </li>
@@ -76,15 +72,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script>
-        window.addEventListener('load', function() {
-            var preloader = document.getElementById('preloader');
-            if (preloader) {
-                preloader.style.opacity = '0';
-                setTimeout(function() {
-                    preloader.style.display = 'none';
-                }, 300);
-            }
-        });
+        
 </script>
 @yield('scripts')
 </body>
